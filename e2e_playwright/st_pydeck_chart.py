@@ -107,6 +107,7 @@ st.pydeck_chart(
             ),
         ],
     ),
+    use_container_width=True,
     on_select="rerun",
 )
 

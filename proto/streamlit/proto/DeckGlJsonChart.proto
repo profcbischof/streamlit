@@ -33,4 +33,8 @@ message DeckGlJsonChart {
 
   // The user-configured Mapbox token. If empty, the token id fetched from https://data.streamlit.io/tokens.json
   string mapbox_token = 6;
+
+  // TODO: Might want to make this an enum instead
+  // Named selection parameters that are activated to trigger reruns.
+  // repeated string selection_mode = 7;
 }

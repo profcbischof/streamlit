@@ -16,17 +16,30 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import TYPE_CHECKING, Any, Dict, Final, Mapping, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Final,
+    Literal,
+    Mapping,
+    TypedDict,
+    cast,
+)
 
 from streamlit import config
+from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as PydeckProto
 from streamlit.runtime.metrics_util import gather_metrics
+from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
+from streamlit.runtime.state import WidgetCallback
 from streamlit.util import HASHLIB_KWARGS
 
 if TYPE_CHECKING:
     from pydeck import Deck
 
     from streamlit.delta_generator import DeltaGenerator
+    from streamlit.runtime.state import WidgetCallback
 
 
 # Mapping used when no data is passed.
@@ -35,12 +48,38 @@ EMPTY_MAP: Final[Mapping[str, Any]] = {
 }
 
 
+class PydeckSelectionState(TypedDict, total=False):
+    """
+    The schema for the PyDeck Chart Selection State
+
+    TODO: This is a placeholder. Fill this out
+    """
+
+    points: list[dict[str, Any]]
+    point_indices: list[int]
+    box: list[dict[str, Any]]
+    lasso: list[dict[str, Any]]
+
+
+class PydeckState(TypedDict, total=False):
+    """
+    The schema for the PyDeck Chart State
+
+    TODO: Fill this out
+
+    """
+
+    selection: PydeckSelectionState
+
+
 class PydeckMixin:
     @gather_metrics("pydeck_chart")
     def pydeck_chart(
         self,
         pydeck_obj: Deck | None = None,
         use_container_width: bool = False,
+        *,
+        on_select: Literal["rerun"] | WidgetCallback = "rerun",
     ) -> DeltaGenerator:
         """Draw a chart using the PyDeck library.
 
@@ -137,6 +176,32 @@ class PydeckMixin:
         """
         pydeck_proto = PydeckProto()
         marshall(pydeck_proto, pydeck_obj, use_container_width)
+        ctx = get_script_run_ctx()
+        # key = to_key(pydeck_obj.)
+        is_selection_activated = on_select != "ignore"
+
+        if on_select not in ["ignore", "rerun"] and not callable(on_select):
+            raise StreamlitAPIException(
+                f"You have passed {on_select} to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
+            )
+
+        # if is_selection_activated:
+        #     # Selections are activated, treat plotly chart as a widget:
+
+        #     widget_state = register_widget(
+        #         "pydeck_chart",
+        #         pydeck_proto,
+        #         ctx=ctx,
+        #         # user_key=key,
+        #         deserializer=serde.deserialize,
+        #         on_change_handler=on_select,
+        #         serializer=serde.serialize,
+        #     )
+
+        #     self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
+        #     # TODO: Figure this out
+        #     return cast(PydeckProto, widget_state.value)
+
         return self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
 
     @property

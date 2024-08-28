@@ -86,7 +86,7 @@ H3_HEX_DATA = [
 ]
 df = pd.DataFrame(H3_HEX_DATA)
 
-st.pydeck_chart(
+event_data = st.pydeck_chart(
     pdk.Deck(
         map_style="mapbox://styles/mapbox/outdoors-v12",
         tooltip={"text": "Count: {count}"},
@@ -110,6 +110,8 @@ st.pydeck_chart(
     use_container_width=True,
     on_select="rerun",
 )
+
+event_data
 
 st.pydeck_chart(
     pdk.Deck(

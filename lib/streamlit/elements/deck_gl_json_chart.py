@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -28,11 +29,12 @@ from typing import (
 )
 
 from streamlit import config
+from streamlit.elements.lib.event_utils import AttributeDictionary
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as PydeckProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
-from streamlit.runtime.state import WidgetCallback
+from streamlit.runtime.state import WidgetCallback, register_widget
 from streamlit.util import HASHLIB_KWARGS
 
 if TYPE_CHECKING:
@@ -72,6 +74,37 @@ class PydeckState(TypedDict, total=False):
     selection: PydeckSelectionState
 
 
+@dataclass
+class PydeckSelectionSerde:
+    """PydeckSelectionSerde is used to serialize and deserialize the Pydeck selection state."""
+
+    def deserialize(self, ui_value: str | None, widget_id: str = "") -> PydeckState:
+        empty_selection_state: PydeckState = {
+            "selection": {
+                "points": [],
+                "point_indices": [],
+                "box": [],
+                "lasso": [],
+            },
+        }
+
+        print("ui_value", ui_value)
+
+        selection_state = (
+            empty_selection_state
+            if ui_value is None
+            else cast(PydeckState, AttributeDictionary(json.loads(ui_value)))
+        )
+
+        if "selection" not in selection_state:
+            selection_state = empty_selection_state
+
+        return cast(PydeckState, AttributeDictionary(selection_state))
+
+    def serialize(self, selection_state: PydeckState) -> str:
+        return json.dumps(selection_state, default=str)
+
+
 class PydeckMixin:
     @gather_metrics("pydeck_chart")
     def pydeck_chart(
@@ -79,8 +112,8 @@ class PydeckMixin:
         pydeck_obj: Deck | None = None,
         use_container_width: bool = False,
         *,
-        on_select: Literal["rerun"] | WidgetCallback = "rerun",
-    ) -> DeltaGenerator:
+        on_select: Literal["rerun", "ignore"] | WidgetCallback = "ignore",
+    ) -> DeltaGenerator | PydeckState:
         """Draw a chart using the PyDeck library.
 
         This supports 3D maps, point clouds, and more! More info about PyDeck
@@ -185,22 +218,25 @@ class PydeckMixin:
                 f"You have passed {on_select} to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
             )
 
-        # if is_selection_activated:
-        #     # Selections are activated, treat plotly chart as a widget:
+        print("is_selection_activated", is_selection_activated)
 
-        #     widget_state = register_widget(
-        #         "pydeck_chart",
-        #         pydeck_proto,
-        #         ctx=ctx,
-        #         # user_key=key,
-        #         deserializer=serde.deserialize,
-        #         on_change_handler=on_select,
-        #         serializer=serde.serialize,
-        #     )
+        if is_selection_activated:
+            # Selections are activated, treat Pydeck as a widget:
 
-        #     self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
-        #     # TODO: Figure this out
-        #     return cast(PydeckProto, widget_state.value)
+            serde = PydeckSelectionSerde()
+
+            widget_state = register_widget(
+                "deck_gl_json_chart",
+                pydeck_proto,
+                ctx=ctx,
+                # user_key=key,
+                deserializer=serde.deserialize,
+                on_change_handler=on_select if callable(on_select) else None,
+                serializer=serde.serialize,
+            )
+
+            self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
+            return cast(PydeckState, widget_state.value)
 
         return self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
 

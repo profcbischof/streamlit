@@ -52,6 +52,7 @@ import {
 } from "./styled-components"
 
 import "mapbox-gl/dist/mapbox-gl.css"
+import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 
 interface DeckObject {
   initialViewState: {
@@ -91,6 +92,8 @@ export interface DeckGLProps {
 
 export interface PropsWithHeight extends DeckGLProps {
   height?: number
+  widgetMgr: WidgetStateManager
+  fragmentId: string | undefined
 }
 
 export interface State {
@@ -250,10 +253,30 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
     this.setState({ viewState })
   }
 
+  handleClick: DeckProps["onClick"] = info => {
+    const { layer, object } = info
+    const { widgetMgr, element, fragmentId } = this.props
+
+    console.log({ layer, object })
+
+    widgetMgr.setStringValue(
+      element,
+      JSON.stringify({
+        selection: {
+          object,
+        },
+      }),
+      { fromUi: true },
+      fragmentId
+    )
+  }
+
   render(): ReactNode {
     const deck = DeckGlJsonChart.getDeckObject(this.props, this.state)
     const { viewState } = this.state
     const { width } = this.props
+
+    console.log({ props: this.props, state: this.state, deck })
 
     return (
       <StyledDeckGlChart
@@ -272,6 +295,7 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
           // @ts-expect-error There is a type mismatch due to our versions of the libraries
           ContextProvider={MapContext.Provider}
           controller
+          onClick={this.handleClick}
         >
           <StaticMap
             height={deck.initialViewState.height}

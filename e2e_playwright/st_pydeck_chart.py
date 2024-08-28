@@ -21,6 +21,8 @@ import pydeck as pdk
 
 import streamlit as st
 
+st.button("Click me to re-run", on_click=lambda: st.write("Hello"))
+
 # Empty chart.
 
 st.pydeck_chart()
@@ -104,7 +106,8 @@ st.pydeck_chart(
                 line_width_min_pixels=2,
             ),
         ],
-    )
+    ),
+    on_select="rerun",
 )
 
 st.pydeck_chart(

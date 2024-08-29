@@ -29,7 +29,7 @@ def print_on_select():
     st.write("on_select")
 
 
-def get_selected_hex_index() -> int:
+def get_selected_hex_index_from_session_state() -> int:
     if st.session_state.get("h3_hex_layer", {}).get("selection", None) is None:
         return -1
 
@@ -37,6 +37,10 @@ def get_selected_hex_index() -> int:
         st.session_state.get("h3_hex_layer", {}).get("selection", {}).get("index", -1)
     )
 
+
+st.write("### Session State")
+st.write(get_selected_hex_index_from_session_state())
+st.write(st.session_state)
 
 event_data = st.pydeck_chart(
     pdk.Deck(
@@ -59,16 +63,24 @@ event_data = st.pydeck_chart(
                 line_width_min_pixels=2,
                 highlight_color=[255, 0, 0],
                 auto_highlight=True,
-                highlighted_object_index=get_selected_hex_index(),
+                highlighted_object_index=get_selected_hex_index_from_session_state(),
             ),
         ],
     ),
     use_container_width=True,
     on_select="rerun",
     # on_select=print_on_select,
-    key="h3_hex_layer",
+    key="h3_hex_map",
 )
 
 
-st.write(get_selected_hex_index())
+def get_selected_hex_index_from_event_data(event_data) -> int:
+    if event_data.get("selection", None) is None:
+        return -1
+
+    return event_data.get("selection", {}).get("index", -1)
+
+
+st.write("### Event Data")
+st.write(get_selected_hex_index_from_event_data(event_data))
 st.write(event_data)

@@ -59,8 +59,8 @@ class PydeckSelectionState(TypedDict, total=False):
     TODO: This is a placeholder. Fill this out
     """
 
-    layer: dict[str, Any]
-    object: dict[str, Any]
+    layerId: str | None
+    object: dict[str, Any] | None
 
 
 class PydeckState(TypedDict, total=False):
@@ -81,12 +81,10 @@ class PydeckSelectionSerde:
     def deserialize(self, ui_value: str | None, widget_id: str = "") -> PydeckState:
         empty_selection_state: PydeckState = {
             "selection": {
-                "layer": {},
-                "object": {},
+                "layerId": None,
+                "object": None,
             },
         }
-
-        print("ui_value", ui_value)
 
         selection_state = (
             empty_selection_state
@@ -94,12 +92,6 @@ class PydeckSelectionSerde:
             else cast(PydeckState, AttributeDictionary(json.loads(ui_value)))
         )
 
-        # if "selection" not in selection_state:
-        #     selection_state = empty_selection_state
-
-        # res = cast(PydeckState, AttributeDictionary(selection_state))
-        # print("res", res)
-        print("selection_state", selection_state)
         return selection_state
 
     def serialize(self, selection_state: PydeckState) -> str:

@@ -88,6 +88,23 @@ def print_on_select():
     st.write("on_select")
 
 
+def get_selected_hex_index():
+    print(st.session_state.get("h3_hex_layer", {}).get("selection", {}).get("object"))
+    if st.session_state.get("h3_hex_layer", {}).get("selection", {}).get("object"):
+        # Find the index of the selected hexagon by iterating over H3_HEX_DATA
+        # and finding the one that matches the object
+        selected_hex = st.session_state["h3_hex_layer"]["selection"]["object"]
+        for i, hex_data in enumerate(H3_HEX_DATA):
+            if hex_data["hex"] == selected_hex["hex"]:
+                return i
+
+        return None
+    return None
+    # if event_data.selection.object
+    #     return event_data.selection.object.
+    # return None
+
+
 event_data = st.pydeck_chart(
     pdk.Deck(
         map_style="mapbox://styles/mapbox/outdoors-v12",
@@ -99,6 +116,7 @@ event_data = st.pydeck_chart(
             pdk.Layer(
                 "H3HexagonLayer",
                 df,
+                id="MyHexLayer",
                 pickable=True,
                 stroked=True,
                 filled=True,
@@ -106,6 +124,9 @@ event_data = st.pydeck_chart(
                 get_fill_color="[0, 255, 0]",
                 get_line_color=[255, 255, 255],
                 line_width_min_pixels=2,
+                highlight_color=[255, 0, 0],
+                auto_highlight=True,
+                highlighted_object_index=get_selected_hex_index(),
             ),
         ],
     ),
@@ -115,6 +136,8 @@ event_data = st.pydeck_chart(
     key="h3_hex_layer",
 )
 
+
+st.write(get_selected_hex_index())
 st.write(event_data)
 
 # st.write(st.session_state)

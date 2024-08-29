@@ -300,8 +300,6 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
     const { viewState } = this.state
     const { width } = this.props
 
-    console.log({ props: this.props, state: this.state, deck })
-
     return (
       <StyledDeckGlChart
         className="stDeckGlJsonChart"

@@ -289,7 +289,7 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
 
     widgetMgr.setStringValue(
       element,
-      JSON.stringify(serializablePickingInfo),
+      JSON.stringify({ selection: serializablePickingInfo }),
       { fromUi: true },
       fragmentId
     )

@@ -12,69 +12,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
+from typing import Any, cast
 
+import numpy as np
 import pandas as pd
 import pydeck as pdk
 
 import streamlit as st
 
-st.button("Click me to re-run", on_click=lambda: st.write("Hello"), key="MyButton")
-
 # Empty chart.
 
-# st.pydeck_chart()
+st.pydeck_chart()
 
-# # Basic chart.
+# Basic chart.
 
-# np.random.seed(12345)
+np.random.seed(12345)
 
-# df = pd.DataFrame(
-#     cast(Any, np.random.randn(1000, 2) / [50, 50]) + [37.76, -122.4],
-#     columns=["lat", "lon"],
-# )
+df = pd.DataFrame(
+    cast(Any, np.random.randn(1000, 2) / [50, 50]) + [37.76, -122.4],
+    columns=["lat", "lon"],
+)
 
-# st.pydeck_chart(
-#     pdk.Deck(
-#         map_style="mapbox://styles/mapbox/light-v9",
-#         initial_view_state=pdk.ViewState(
-#             latitude=37.76,
-#             longitude=-122.4,
-#             zoom=11,
-#             pitch=50,
-#         ),
-#         layers=[
-#             pdk.Layer(
-#                 "HexagonLayer",
-#                 data=df,
-#                 get_position="[lon, lat]",
-#                 radius=200,
-#                 elevation_scale=4,
-#                 elevation_range=[0, 1000],
-#                 pickable=True,
-#                 extruded=True,
-#             ),
-#             pdk.Layer(
-#                 "ScatterplotLayer",
-#                 data=df,
-#                 get_position="[lon, lat]",
-#                 get_color="[200, 30, 0, 160]",
-#                 get_radius=200,
-#             ),
-#         ],
-#     )
-# )
+st.pydeck_chart(
+    pdk.Deck(
+        map_style="mapbox://styles/mapbox/light-v9",
+        initial_view_state=pdk.ViewState(
+            latitude=37.76,
+            longitude=-122.4,
+            zoom=11,
+            pitch=50,
+        ),
+        layers=[
+            pdk.Layer(
+                "HexagonLayer",
+                data=df,
+                get_position="[lon, lat]",
+                radius=200,
+                elevation_scale=4,
+                elevation_range=[0, 1000],
+                pickable=True,
+                extruded=True,
+            ),
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=df,
+                get_position="[lon, lat]",
+                get_color="[200, 30, 0, 160]",
+                get_radius=200,
+            ),
+        ],
+    )
+)
 
-# # Chart w/ invalid JSON - issue #5799.
-# data = pd.DataFrame({"lng": [-109.037673], "lat": [36.994672], "weight": [math.nan]})
-# layer = pdk.Layer(
-#     "ScatterplotLayer", data=data, get_position=["lng", "lat"], radius_min_pixels=4
-# )
-# deck = pdk.Deck(
-#     layers=[layer],
-#     map_style=pdk.map_styles.CARTO_LIGHT,
-#     tooltip={"text": "weight: {weight}"},
-# )
-# st.pydeck_chart(deck, use_container_width=True)
+# Chart w/ invalid JSON - issue #5799.
+data = pd.DataFrame({"lng": [-109.037673], "lat": [36.994672], "weight": [math.nan]})
+layer = pdk.Layer(
+    "ScatterplotLayer", data=data, get_position=["lng", "lat"], radius_min_pixels=4
+)
+deck = pdk.Deck(
+    layers=[layer],
+    map_style=pdk.map_styles.CARTO_LIGHT,
+    tooltip={"text": "weight: {weight}"},
+)
+st.pydeck_chart(deck, use_container_width=True)
 
 H3_HEX_DATA = [
     {"hex": "88283082b9fffff", "count": 10},
@@ -83,29 +84,7 @@ H3_HEX_DATA = [
 ]
 df = pd.DataFrame(H3_HEX_DATA)
 
-
-def print_on_select():
-    st.write("on_select")
-
-
-def get_selected_hex_index():
-    print(st.session_state.get("h3_hex_layer", {}).get("selection", {}).get("object"))
-    if st.session_state.get("h3_hex_layer", {}).get("selection", {}).get("object"):
-        # Find the index of the selected hexagon by iterating over H3_HEX_DATA
-        # and finding the one that matches the object
-        selected_hex = st.session_state["h3_hex_layer"]["selection"]["object"]
-        for i, hex_data in enumerate(H3_HEX_DATA):
-            if hex_data["hex"] == selected_hex["hex"]:
-                return i
-
-        return None
-    return None
-    # if event_data.selection.object
-    #     return event_data.selection.object.
-    # return None
-
-
-event_data = st.pydeck_chart(
+st.pydeck_chart(
     pdk.Deck(
         map_style="mapbox://styles/mapbox/outdoors-v12",
         tooltip={"text": "Count: {count}"},
@@ -116,7 +95,6 @@ event_data = st.pydeck_chart(
             pdk.Layer(
                 "H3HexagonLayer",
                 df,
-                id="MyHexLayer",
                 pickable=True,
                 stroked=True,
                 filled=True,
@@ -124,50 +102,37 @@ event_data = st.pydeck_chart(
                 get_fill_color="[0, 255, 0]",
                 get_line_color=[255, 255, 255],
                 line_width_min_pixels=2,
-                highlight_color=[255, 0, 0],
-                auto_highlight=True,
-                highlighted_object_index=get_selected_hex_index(),
             ),
         ],
-    ),
-    use_container_width=True,
-    on_select="rerun",
-    # on_select=print_on_select,
-    key="h3_hex_layer",
+    )
 )
 
-
-st.write(get_selected_hex_index())
-st.write(event_data)
-
-# st.write(st.session_state)
-
-# st.pydeck_chart(
-#     pdk.Deck(
-#         initial_view_state=pdk.ViewState(
-#             latitude=37.76,
-#             longitude=-122.4,
-#             zoom=11,
-#             pitch=50,
-#         ),
-#         layers=[
-#             pdk.Layer(
-#                 "HexagonLayer",
-#                 data=df,
-#                 get_position="[lon, lat]",
-#                 radius=200,
-#                 elevation_scale=4,
-#                 elevation_range=[0, 1000],
-#                 pickable=True,
-#                 extruded=True,
-#             ),
-#             pdk.Layer(
-#                 "ScatterplotLayer",
-#                 data=df,
-#                 get_position="[lon, lat]",
-#                 get_color="[200, 30, 0, 160]",
-#                 get_radius=200,
-#             ),
-#         ],
-#     )
-# )
+st.pydeck_chart(
+    pdk.Deck(
+        initial_view_state=pdk.ViewState(
+            latitude=37.76,
+            longitude=-122.4,
+            zoom=11,
+            pitch=50,
+        ),
+        layers=[
+            pdk.Layer(
+                "HexagonLayer",
+                data=df,
+                get_position="[lon, lat]",
+                radius=200,
+                elevation_scale=4,
+                elevation_range=[0, 1000],
+                pickable=True,
+                extruded=True,
+            ),
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=df,
+                get_position="[lon, lat]",
+                get_color="[200, 30, 0, 160]",
+                get_radius=200,
+            ),
+        ],
+    )
+)

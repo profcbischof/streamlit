@@ -84,7 +84,7 @@ class PydeckState(TypedDict, total=False):
 
     """
 
-    selection: PydeckSelectionState
+    selection: PydeckSelectionState | None
 
 
 @dataclass
@@ -92,21 +92,7 @@ class PydeckSelectionSerde:
     """PydeckSelectionSerde is used to serialize and deserialize the Pydeck selection state."""
 
     def deserialize(self, ui_value: str | None, widget_id: str = "") -> PydeckState:
-        empty_selection_state: PydeckState = {
-            "selection": {
-                "color": (0, 0, 0, 0),
-                "layer": None,
-                "index": -1,
-                "picked": False,
-                "x": 0.0,
-                "y": 0.0,
-                "pixel": (0.0, 0.0),
-                "coordinate": (0.0, 0.0),
-                "devicePixel": (0, 0),
-                "pixelRatio": 0,
-                "object": {},
-            },
-        }
+        empty_selection_state: PydeckState = {"selection": None}
 
         selection_state = (
             empty_selection_state
@@ -247,8 +233,6 @@ class PydeckMixin:
         key = to_key(key)
         is_selection_activated = on_select != "ignore"
 
-        print("before pydeck_proto.id", pydeck_proto.id)
-
         pydeck_proto.id = compute_widget_id(
             "deck_gl_json_chart",
             user_key=key,
@@ -259,14 +243,10 @@ class PydeckMixin:
             page=ctx.active_script_hash if ctx else None,
         )
 
-        print("after pydeck_proto.id", pydeck_proto.id)
-
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
             raise StreamlitAPIException(
                 f"You have passed {on_select} to `on_select`. But only 'ignore', 'rerun', or a callable is supported."
             )
-
-        print("is_selection_activated", is_selection_activated)
 
         if is_selection_activated:
             # Selections are activated, treat Pydeck as a widget:
@@ -284,8 +264,6 @@ class PydeckMixin:
             )
 
             self.dg._enqueue("deck_gl_json_chart", pydeck_proto)
-
-            print("widget_state.value", widget_state.value)
 
             return cast(PydeckState, widget_state.value)
 

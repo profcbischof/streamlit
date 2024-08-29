@@ -83,6 +83,11 @@ H3_HEX_DATA = [
 ]
 df = pd.DataFrame(H3_HEX_DATA)
 
+
+def print_on_select():
+    st.write("on_select")
+
+
 event_data = st.pydeck_chart(
     pdk.Deck(
         map_style="mapbox://styles/mapbox/outdoors-v12",
@@ -106,12 +111,13 @@ event_data = st.pydeck_chart(
     ),
     use_container_width=True,
     on_select="rerun",
+    # on_select=print_on_select,
     key="h3_hex_layer",
 )
 
 st.write(event_data)
 
-st.write(st.session_state)
+# st.write(st.session_state)
 
 # st.pydeck_chart(
 #     pdk.Deck(

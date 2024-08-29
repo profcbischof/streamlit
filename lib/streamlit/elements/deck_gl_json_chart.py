@@ -59,8 +59,21 @@ class PydeckSelectionState(TypedDict, total=False):
     TODO: This is a placeholder. Fill this out
     """
 
-    layerId: str | None
-    object: dict[str, Any] | None
+    color: tuple[int, int, int, int]  # Color of the clicked object
+    layer: (
+        str | None
+    )  # The layer ID, which you can specify by passing `id=...` to a Layer; `None` if no layer is picked
+    index: int  # The serial index of the clicked point in the data set; -1 if no layer is picked
+    picked: bool
+    x: float  # X coordinate of pixel on click
+    y: float  # Y coordinate of pixel on click
+    pixel: tuple[float, float]  # Pixel coordinate pair
+    coordinate: tuple[float, float]  # Lat/lon coordinate pair
+    devicePixel: tuple[int, int]  # Pixel coordinate pair on device screen
+    pixelRatio: int
+    object: dict[
+        str, Any
+    ]  # Metadata from selected clicked object which varies by layer
 
 
 class PydeckState(TypedDict, total=False):
@@ -81,8 +94,17 @@ class PydeckSelectionSerde:
     def deserialize(self, ui_value: str | None, widget_id: str = "") -> PydeckState:
         empty_selection_state: PydeckState = {
             "selection": {
-                "layerId": None,
-                "object": None,
+                "color": (0, 0, 0, 0),
+                "layer": None,
+                "index": -1,
+                "picked": False,
+                "x": 0.0,
+                "y": 0.0,
+                "pixel": (0.0, 0.0),
+                "coordinate": (0.0, 0.0),
+                "devicePixel": (0, 0),
+                "pixelRatio": 0,
+                "object": {},
             },
         }
 

@@ -53,6 +53,7 @@ import {
 } from "./styled-components"
 
 import "mapbox-gl/dist/mapbox-gl.css"
+import { SerializablePickingInfo } from "./types"
 
 interface DeckObject {
   initialViewState: {
@@ -256,20 +257,39 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
     this.setState({ viewState })
   }
 
-  handleClick: DeckProps["onClick"] = (info, event) => {
-    const { layer, object } = info
+  handleClick: DeckProps["onClick"] = info => {
     const { widgetMgr, element, fragmentId } = this.props
+    const {
+      color,
+      layer,
+      index,
+      picked,
+      x,
+      y,
+      pixel,
+      coordinate,
+      devicePixel,
+      pixelRatio,
+      object,
+    } = info
 
-    console.log({ layer, object, event })
+    const serializablePickingInfo: SerializablePickingInfo = {
+      color,
+      layer: layer?.id || null,
+      index,
+      picked,
+      x,
+      y,
+      pixel,
+      coordinate,
+      devicePixel,
+      pixelRatio,
+      object,
+    }
 
     widgetMgr.setStringValue(
       element,
-      JSON.stringify({
-        selection: {
-          layerId: layer?.id || null,
-          object: object || null,
-        },
-      }),
+      JSON.stringify(serializablePickingInfo),
       { fromUi: true },
       fragmentId
     )

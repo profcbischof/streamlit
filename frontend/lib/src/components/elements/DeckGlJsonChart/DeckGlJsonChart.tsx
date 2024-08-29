@@ -273,7 +273,7 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       object,
     } = info
 
-    const serializablePickingInfo: SerializablePickingInfo = {
+    const selection: SerializablePickingInfo = {
       color,
       layer: layer?.id || null,
       index,
@@ -289,7 +289,7 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
 
     widgetMgr.setStringValue(
       element,
-      JSON.stringify({ selection: serializablePickingInfo }),
+      JSON.stringify({ selection }),
       { fromUi: true },
       fragmentId
     )

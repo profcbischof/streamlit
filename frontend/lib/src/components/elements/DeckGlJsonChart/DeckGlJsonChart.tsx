@@ -263,7 +263,8 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       element,
       JSON.stringify({
         selection: {
-          object,
+          layer: {},
+          _object: object,
         },
       }),
       { fromUi: true },

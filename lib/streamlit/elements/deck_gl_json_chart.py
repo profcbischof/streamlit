@@ -60,7 +60,7 @@ class PydeckSelectionState(TypedDict, total=False):
     """
 
     layer: dict[str, Any]
-    _object: dict[str, Any]
+    object: dict[str, Any]
 
 
 class PydeckState(TypedDict, total=False):
@@ -82,7 +82,7 @@ class PydeckSelectionSerde:
         empty_selection_state: PydeckState = {
             "selection": {
                 "layer": {},
-                "_object": {},
+                "object": {},
             },
         }
 

@@ -59,7 +59,7 @@ class PydeckSelectionState(TypedDict, total=False):
     TODO: This is a placeholder. Fill this out
     """
 
-    color: tuple[int, int, int, int]  # Color of the clicked object
+    color: tuple[int, int, int, int] | None  # Color of the clicked object
     layer: (
         str | None
     )  # The layer ID, which you can specify by passing `id=...` to a Layer; `None` if no layer is picked
@@ -69,11 +69,11 @@ class PydeckSelectionState(TypedDict, total=False):
     y: float  # Y coordinate of pixel on click
     pixel: tuple[float, float]  # Pixel coordinate pair
     coordinate: tuple[float, float]  # Lat/lon coordinate pair
-    devicePixel: tuple[int, int]  # Pixel coordinate pair on device screen
+    devicePixel: tuple[int, int] | None  # Pixel coordinate pair on device screen
     pixelRatio: int
-    object: dict[
-        str, Any
-    ]  # Metadata from selected clicked object which varies by layer
+    object: (
+        dict[str, Any] | None
+    )  # Metadata from selected clicked object which varies by layer
 
 
 class PydeckState(TypedDict, total=False):

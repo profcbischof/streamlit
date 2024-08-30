@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { PickingInfo } from "@deck.gl/core/typed"
+import { DeckProps, PickingInfo } from "@deck.gl/core/typed"
+
+export type StreamlitDeckProps = DeckProps & {
+  mapStyle?: string
+}
 
 /**
  * The information that can be serialized back to the server.

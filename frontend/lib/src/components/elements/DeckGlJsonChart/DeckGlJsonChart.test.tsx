@@ -82,6 +82,11 @@ const getProps = (
     height: undefined,
     theme: mockTheme.emotion,
     isFullScreen: false,
+    fragmentId: "myFragmentId",
+    widgetMgr: {
+      getStringValue: jest.fn(),
+      setStringValue: jest.fn(),
+    } as any,
   }
 }
 

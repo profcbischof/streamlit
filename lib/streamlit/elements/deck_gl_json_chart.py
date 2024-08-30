@@ -80,8 +80,7 @@ class PydeckState(TypedDict, total=False):
     """
     The schema for the PyDeck Chart State
 
-    TODO: Fill this out
-
+    TODO: This is a placeholder. Fill this out
     """
 
     selection: PydeckSelectionState | None

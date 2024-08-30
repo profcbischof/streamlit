@@ -26,6 +26,7 @@ from typing import (
     Mapping,
     TypedDict,
     cast,
+    overload,
 )
 
 from streamlit import config
@@ -106,23 +107,25 @@ class PydeckSelectionSerde:
 
 
 class PydeckMixin:
-    # @overload
-    # def pydeck_chart(
-    #     self,
-    #     pydeck_obj: Deck | None = None,
-    #     use_container_width: bool = False,
-    #     *,
-    #     on_select: Literal["ignore"],  # No default value here to make it work with mypy
-    # ) -> DeltaGenerator: ...
+    @overload
+    def pydeck_chart(
+        self,
+        pydeck_obj: Deck | None = None,
+        use_container_width: bool = False,
+        *,
+        on_select: Literal["ignore"],  # No default value here to make it work with mypy
+        key: Key | None = None,
+    ) -> DeltaGenerator: ...
 
-    # @overload
-    # def pydeck_chart(
-    #     self,
-    #     pydeck_obj: Deck | None = None,
-    #     use_container_width: bool = False,
-    #     *,
-    #     on_select: Literal["rerun"] | WidgetCallback = "rerun",
-    # ) -> PydeckState: ...
+    @overload
+    def pydeck_chart(
+        self,
+        pydeck_obj: Deck | None = None,
+        use_container_width: bool = False,
+        *,
+        on_select: Literal["rerun"] | WidgetCallback = "rerun",
+        key: Key | None = None,
+    ) -> PydeckState: ...
 
     @gather_metrics("pydeck_chart")
     def pydeck_chart(

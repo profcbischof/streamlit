@@ -254,11 +254,10 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
     this.setState({ viewState })
   }
 
-  handleClick: DeckProps["onClick"] = info => {
+  handleClick: DeckProps["onClick"] = (info, event) => {
     const { widgetMgr, element, fragmentId } = this.props
     const {
       color,
-      layer,
       index,
       picked,
       x,
@@ -270,9 +269,11 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       object,
     } = info
 
+    const layer = `${info.layer?.id || null}`
+
     const selection: SerializablePickingInfo = {
       color,
-      layer: layer?.id || null,
+      layer,
       index,
       picked,
       x,
@@ -284,9 +285,27 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       object,
     }
 
+    // TODO:
+    // 1. Be able to differentiate a widget from a view-only Chart element
+    // 2. Unselect an already selected index
+
+    const wasShiftClick = event.srcEvent.shiftKey
+
+    const currState = JSON5.parse(widgetMgr.getStringValue(element) || "{}")
+    const indices = wasShiftClick
+      ? currState.selection[layer]?.indices || []
+      : []
+
+    indices.push(index)
+
     widgetMgr.setStringValue(
       element,
-      JSON.stringify({ selection }),
+      JSON.stringify({
+        selection: {
+          ...(wasShiftClick ? currState.selection : {}),
+          [`${layer}`]: { ...selection, indices },
+        },
+      }),
       { fromUi: true },
       fragmentId
     )

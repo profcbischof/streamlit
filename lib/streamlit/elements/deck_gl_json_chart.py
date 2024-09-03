@@ -84,7 +84,7 @@ class PydeckState(TypedDict, total=False):
     TODO: This is a placeholder. Fill this out
     """
 
-    selection: PydeckSelectionState | None
+    selection: list[PydeckSelectionState] | None
 
 
 @dataclass

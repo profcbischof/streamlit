@@ -123,9 +123,9 @@ event_data = st.pydeck_chart(
     ),
     use_container_width=True,
     on_select="rerun",
-    # on_select=print_on_select,
     key="h3_hex_map",
 )
+
 
 DATA_URL = "https://raw.githubusercontent.com/visgl/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
 
@@ -161,6 +161,55 @@ geo_json_data = st.pydeck_chart(
     on_select="rerun",
     key="geo_json_map",
 )
+
+df3 = pd.DataFrame(H3_HEX_DATA)
+
+
+# A map without a Key, and assert that we can read its return value
+keyless_map_data = st.pydeck_chart(
+    pdk.Deck(
+        map_style="mapbox://styles/mapbox/outdoors-v12",
+        tooltip={"text": "Count: {count}"},
+        initial_view_state=pdk.ViewState(
+            latitude=37.7749295, longitude=-122.4194155, zoom=11, bearing=0, pitch=30
+        ),
+        layers=[
+            pdk.Layer(
+                "H3HexagonLayer",
+                df3,
+                id="MyHexLayer",
+                pickable=True,
+                stroked=True,
+                filled=True,
+                extruded=True,
+                elevation_scale=20,
+                get_hexagon="hex",
+                get_elevation="count",
+                get_fill_color="color",
+                get_line_color=[255, 255, 255],
+                line_width_min_pixels=2,
+            ),
+        ],
+    ),
+    use_container_width=True,
+    on_select="rerun",
+)
+
+
+st.write(keyless_map_data)
+
+# TODO: This needs some type work
+# if (keyless_map_data is not None) and ("selection" in keyless_map_data):
+#     df3["color"] = df3.index.to_series().apply(
+#         lambda idx: [255, 0, 0]
+#         if idx
+#         in (
+#             keyless_map_data.get("selection", {})
+#             .get("MyHexLayer", {})
+#             .get("indices", [])
+#         )
+#         else [0, 0, 255]
+#     )
 
 
 bartLinesData = pd.read_json(

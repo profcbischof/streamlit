@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass
 from typing import (
@@ -31,6 +30,7 @@ from typing import (
 
 from streamlit import config
 from streamlit.elements.lib.event_utils import AttributeDictionary
+from streamlit.elements.lib.map_utils import get_hash_of_json_data
 from streamlit.elements.lib.utils import Key, to_key
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as PydeckProto
@@ -38,7 +38,6 @@ from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 from streamlit.runtime.state import WidgetCallback, register_widget
 from streamlit.runtime.state.common import compute_widget_id
-from streamlit.util import HASHLIB_KWARGS
 
 if TYPE_CHECKING:
     from pydeck import Deck
@@ -235,14 +234,17 @@ class PydeckMixin:
         key = to_key(key)
         is_selection_activated = on_select != "ignore"
 
-        pydeck_proto.id = compute_widget_id(
-            "deck_gl_json_chart",
-            user_key=key,
-            key=key,
-            # pydeck_obj=pydeck_obj,
-            is_selection_activated=is_selection_activated,
-            use_container_width=use_container_width,
-            page=ctx.active_script_hash if ctx else None,
+        pydeck_proto.id = (
+            compute_widget_id(
+                "deck_gl_json_chart",
+                user_key=key,
+                key=key,
+                is_selection_activated=is_selection_activated,
+                use_container_width=use_container_width,
+                page=ctx.active_script_hash if ctx else None,
+            )
+            if is_selection_activated
+            else ""
         )
 
         if on_select not in ["ignore", "rerun"] and not callable(on_select):
@@ -306,13 +308,14 @@ def marshall(
     else:
         spec = pydeck_obj.to_json()
         json_string = json.dumps(spec)
-        json_bytes = json_string.encode("utf-8")
-        id = hashlib.md5(json_bytes, **HASHLIB_KWARGS).hexdigest()
+        id = get_hash_of_json_data(json_string)
 
     pydeck_proto.json = spec
     pydeck_proto.use_container_width = use_container_width
 
     pydeck_proto.id = id
+
+    pydeck_proto.hash = id
 
     tooltip = _get_pydeck_tooltip(pydeck_obj)
     if tooltip:

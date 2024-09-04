@@ -304,6 +304,11 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       indices.push(index)
     }
 
+    // TODO: Clicking on a null layer sets data in a maybe unexpected way, where
+    // you have { selection: { null: { indices: [-1] } } } Multiselecting on a
+    // null layer when there is existing state is probably even more unexpected.
+    // Figure out what we should do here.
+
     widgetMgr.setStringValue(
       element,
       JSON.stringify({

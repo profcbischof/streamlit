@@ -240,7 +240,11 @@ const NEW_SESSION_JSON: INewSession = {
     isHello: false,
   },
   appPages: [
-    { pageScriptHash: "page_script_hash", pageName: "streamlit_app" },
+    {
+      pageScriptHash: "page_script_hash",
+      pageName: "streamlit app",
+      urlPathname: "streamlit_app",
+    },
   ],
   pageScriptHash: "page_script_hash",
   mainScriptPath: "path/to/file.py",
@@ -864,8 +868,8 @@ describe("App", () => {
       expect(screen.queryByTestId("stSidebarNav")).not.toBeInTheDocument()
 
       const appPages = [
-        { pageScriptHash: "hash1", pageName: "page1" },
-        { pageScriptHash: "hash2", pageName: "page2" },
+        { pageScriptHash: "hash1", pageName: "page1", urlPathname: "page1" },
+        { pageScriptHash: "hash2", pageName: "page2", urlPathname: "page2" },
       ]
 
       sendForwardMessage("newSession", {
@@ -988,8 +992,16 @@ describe("App", () => {
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
           appPages: [
-            { pageScriptHash: "page_script_hash", pageName: "streamlit_app" },
-            { pageScriptHash: "hash2", pageName: "page2" },
+            {
+              pageScriptHash: "page_script_hash",
+              pageName: "streamlit app",
+              urlPathname: "streamlit_app",
+            },
+            {
+              pageScriptHash: "hash2",
+              pageName: "page2",
+              urlPathname: "page2",
+            },
           ],
           pageScriptHash: "hash2",
         })
@@ -1026,8 +1038,16 @@ describe("App", () => {
         )
 
         const appPages = [
-          { pageScriptHash: "toppage_hash", pageName: "streamlit_app" },
-          { pageScriptHash: "subpage_hash", pageName: "page2" },
+          {
+            pageScriptHash: "toppage_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+          },
+          {
+            pageScriptHash: "subpage_hash",
+            pageName: "page2",
+            urlPathname: "page2",
+          },
         ]
 
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
@@ -1069,8 +1089,16 @@ describe("App", () => {
         sendForwardMessage("newSession", {
           ...NEW_SESSION_JSON,
           appPages: [
-            { pageScriptHash: "page_script_hash", pageName: "streamlit_app" },
-            { pageScriptHash: "hash2", pageName: "page2" },
+            {
+              pageScriptHash: "page_script_hash",
+              pageName: "streamlit app",
+              urlPathname: "streamlit_app",
+            },
+            {
+              pageScriptHash: "hash2",
+              pageName: "page2",
+              urlPathname: "page2",
+            },
           ],
           pageScriptHash: "hash2",
         })
@@ -1087,8 +1115,16 @@ describe("App", () => {
         history.replaceState({}, "", "/") // The URL is set to the main page from the beginning.
 
         const appPages = [
-          { pageScriptHash: "toppage_hash", pageName: "streamlit_app" },
-          { pageScriptHash: "subpage_hash", pageName: "page2" },
+          {
+            pageScriptHash: "toppage_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+          },
+          {
+            pageScriptHash: "subpage_hash",
+            pageName: "page2",
+            urlPathname: "page2",
+          },
         ]
 
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
@@ -1122,8 +1158,16 @@ describe("App", () => {
         history.replaceState({}, "", "/page2") // Starting from a not main page.
 
         const appPages = [
-          { pageScriptHash: "toppage_hash", pageName: "streamlit_app" },
-          { pageScriptHash: "subpage_hash", pageName: "page2" },
+          {
+            pageScriptHash: "toppage_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+          },
+          {
+            pageScriptHash: "subpage_hash",
+            pageName: "page2",
+            urlPathname: "page2",
+          },
         ]
 
         // Because the page URL is already "/" pointing to the main page, no new history is pushed.
@@ -1275,8 +1319,16 @@ describe("App", () => {
         isHello: false,
       },
       appPages: [
-        { pageScriptHash: "top_hash", pageName: "streamlit_app" },
-        { pageScriptHash: "sub_hash", pageName: "page2" },
+        {
+          pageScriptHash: "top_hash",
+          pageName: "streamlit app",
+          urlPathname: "",
+        },
+        {
+          pageScriptHash: "sub_hash",
+          pageName: "page2",
+          urlPathname: "page2",
+        },
       ],
       pageScriptHash: "top_hash",
       fragmentIdsThisRun: [],
@@ -1574,8 +1626,16 @@ describe("App", () => {
       )
 
       const appPages = [
-        { pageScriptHash: "toppage_hash", pageName: "streamlit_app" },
-        { pageScriptHash: "subpage_hash", pageName: "page2" },
+        {
+          pageScriptHash: "toppage_hash",
+          pageName: "streamlit app",
+          urlPathname: "streamlit_app",
+        },
+        {
+          pageScriptHash: "subpage_hash",
+          pageName: "page2",
+          urlPathname: "page2",
+        },
       ]
 
       // Because the page URL is already "/" pointing to the main page, no new history is pushed.
@@ -1681,7 +1741,7 @@ describe("App", () => {
       expect(screen.getByTestId("stLogo")).toBeInTheDocument()
     })
 
-    it("will remove logo if activeScriptHash does not match", async () => {
+    it("MPA V1 - won't remove logo on page change (based on activeScriptHash)", async () => {
       renderApp(getProps())
 
       sendForwardMessage(
@@ -1703,7 +1763,50 @@ describe("App", () => {
         pageScriptHash: "different_page_script_hash",
       })
 
-      // Since the logo was added with a different activeScriptHash, it should be removed
+      // Specifically did not send the scriptFinished here as that would handle cleanup based on scriptRunId
+      await waitFor(() => {
+        expect(screen.getByTestId("stLogo")).toBeInTheDocument()
+      })
+    })
+
+    it("MPA V2 - will remove logo if activeScriptHash does not match", async () => {
+      renderApp(getProps())
+
+      // Trigger handleNavigation (MPA V2)
+      sendForwardMessage("navigation", {
+        appPages: [
+          {
+            pageScriptHash: "page_script_hash",
+            pageName: "streamlit_app",
+            isDefault: true,
+          },
+          { pageScriptHash: "other_page_script_hash", pageName: "Page 1" },
+        ],
+        pageScriptHash: "other_page_script_hash",
+        position: 0,
+      })
+
+      // Logo outside common script
+      sendForwardMessage(
+        "logo",
+        {
+          image:
+            "https://global.discourse-cdn.com/business7/uploads/streamlit/original/2X/8/8cb5b6c0e1fe4e4ebfd30b769204c0d30c332fec.png",
+        },
+        {
+          activeScriptHash: "other_page_script_hash",
+        }
+      )
+      expect(screen.getByTestId("stLogo")).toBeInTheDocument()
+
+      // Trigger a new session with a different pageScriptHash
+      sendForwardMessage("newSession", {
+        ...NEW_SESSION_JSON,
+        pageScriptHash: "page_script_hash",
+      })
+
+      // Specifically did not send the scriptFinished here as that would handle cleanup based on scriptRunId
+      // Cleanup for MPA V2 in filterMainScriptElements
       await waitFor(() => {
         expect(screen.queryByTestId("stLogo")).not.toBeInTheDocument()
       })
@@ -1748,7 +1851,13 @@ describe("App", () => {
       renderApp(getProps())
       sendForwardMessage("newSession", {
         ...NEW_SESSION_JSON,
-        appPages: [{ pageScriptHash: "page_hash", pageName: "streamlit_app" }],
+        appPages: [
+          {
+            pageScriptHash: "page_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+          },
+        ],
         pageScriptHash: "page_hash",
       })
       const hostCommunicationMgr = getStoredValue<HostCommunicationManager>(
@@ -1774,7 +1883,13 @@ describe("App", () => {
       renderApp(getProps())
       sendForwardMessage("newSession", {
         ...NEW_SESSION_JSON,
-        appPages: [{ pageScriptHash: "page_hash", pageName: "streamlit_app" }],
+        appPages: [
+          {
+            pageScriptHash: "page_hash",
+            pageName: "streamlit app",
+            urlPathname: "streamlit_app",
+          },
+        ],
         pageScriptHash: "page_hash",
       })
       const hostCommunicationMgr = getStoredValue<HostCommunicationManager>(
@@ -2500,8 +2615,18 @@ describe("App", () => {
       const hostCommunicationMgr = prepareHostCommunicationManager()
 
       const appPages = [
-        { icon: "", pageName: "bob", scriptPath: "bob.py" },
-        { icon: "", pageName: "carl", scriptPath: "carl.py" },
+        {
+          icon: "",
+          pageName: "bob",
+          scriptPath: "bob.py",
+          urlPathname: "bob",
+        },
+        {
+          icon: "",
+          pageName: "carl",
+          scriptPath: "carl.py",
+          urlPathname: "carl",
+        },
       ]
 
       sendForwardMessage("pagesChanged", {
@@ -2652,8 +2777,8 @@ describe("App", () => {
       expect(screen.queryByTestId("stSidebarNav")).not.toBeInTheDocument()
 
       const appPages = [
-        { pageScriptHash: "hash1", pageName: "page1" },
-        { pageScriptHash: "hash2", pageName: "page2" },
+        { pageScriptHash: "hash1", pageName: "page1", urlPathname: "page1" },
+        { pageScriptHash: "hash2", pageName: "page2", urlPathname: "page2" },
       ]
 
       sendForwardMessage("newSession", {

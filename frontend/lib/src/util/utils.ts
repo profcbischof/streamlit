@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import decamelize from "decamelize"
 import get from "lodash/get"
 import xxhash from "xxhashjs"
-import decamelize from "decamelize"
 
 import {
   Alert as AlertProto,
@@ -24,6 +24,9 @@ import {
   LabelVisibilityMessage as LabelVisibilityMessageProto,
   Skeleton as SkeletonProto,
 } from "@streamlit/lib/src/proto"
+
+// This prefix should be in sync with the value on the python side:
+const GENERATED_ELEMENT_ID_PREFIX = "$$ID"
 
 /**
  * Wraps a function to allow it to be called, at most, once per interval
@@ -343,9 +346,25 @@ export function setCookie(
   document.cookie = `${name}=${value};${expirationStr}path=/`
 }
 
-/** Return an Element's widget ID if it's a widget, and undefined otherwise. */
-export function getElementWidgetID(element: Element): string | undefined {
-  return get(element as any, [requireNonNull(element.type), "id"])
+export function isValidElementId(
+  elementId: string | undefined | null
+): boolean {
+  if (!elementId) {
+    return false
+  }
+  return elementId.startsWith(GENERATED_ELEMENT_ID_PREFIX)
+}
+
+/**
+ * If the element has a valid ID, returns it. Otherwise, returns undefined.
+ */
+export function getElementId(element: Element): string | undefined {
+  const elementId = get(element as any, [requireNonNull(element.type), "id"])
+  if (elementId && isValidElementId(elementId)) {
+    // We only care about valid element IDs (with the correct prefix)
+    return elementId
+  }
+  return undefined
 }
 
 /** True if the given form ID is non-null and non-empty. */

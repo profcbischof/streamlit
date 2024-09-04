@@ -33,7 +33,7 @@ from typing_extensions import TypeAlias
 from streamlit import runtime
 from streamlit.elements.form_utils import current_form_id, is_in_form
 from streamlit.elements.lib.policies import check_widget_policies
-from streamlit.elements.lib.utils import Key, to_key
+from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
 from streamlit.errors import StreamlitAPIException
 from streamlit.file_util import get_main_script_directory, normalize_path_join
 from streamlit.navigation.page import StreamlitPage
@@ -49,7 +49,9 @@ from streamlit.runtime.state import (
     WidgetKwargs,
     register_widget,
 )
-from streamlit.runtime.state.common import compute_widget_id, save_for_app_testing
+from streamlit.runtime.state.common import (
+    save_for_app_testing,
+)
 from streamlit.string_util import validate_icon_or_emoji
 from streamlit.url_util import is_url
 
@@ -662,7 +664,7 @@ class ButtonMixin:
             writes_allowed=False,
         )
 
-        id = compute_widget_id(
+        element_id = compute_and_register_element_id(
             "download_button",
             user_key=key,
             label=label,
@@ -682,7 +684,7 @@ class ButtonMixin:
             )
 
         download_button_proto = DownloadButtonProto()
-        download_button_proto.id = id
+        download_button_proto.id = element_id
         download_button_proto.use_container_width = use_container_width
         download_button_proto.label = label
         download_button_proto.default = False
@@ -703,7 +705,6 @@ class ButtonMixin:
         button_state = register_widget(
             "download_button",
             download_button_proto,
-            user_key=key,
             on_change_handler=on_click,
             args=args,
             kwargs=kwargs,
@@ -843,7 +844,7 @@ class ButtonMixin:
             enable_check_callback_rules=not is_form_submitter,
         )
 
-        id = compute_widget_id(
+        element_id = compute_and_register_element_id(
             "button",
             user_key=key,
             label=label,
@@ -872,7 +873,7 @@ class ButtonMixin:
                 )
 
         button_proto = ButtonProto()
-        button_proto.id = id
+        button_proto.id = element_id
         button_proto.label = label
         button_proto.default = False
         button_proto.is_form_submitter = is_form_submitter
@@ -892,7 +893,6 @@ class ButtonMixin:
         button_state = register_widget(
             "button",
             button_proto,
-            user_key=key,
             on_change_handler=on_click,
             args=args,
             kwargs=kwargs,
@@ -902,7 +902,7 @@ class ButtonMixin:
         )
 
         if ctx:
-            save_for_app_testing(ctx, id, button_state.value)
+            save_for_app_testing(ctx, element_id, button_state.value)
         self.dg._enqueue("button", button_proto)
 
         return button_state.value

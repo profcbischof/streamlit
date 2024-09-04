@@ -52,9 +52,9 @@ import {
   StyledNavigationControlContainer,
 } from "./styled-components"
 import type { SerializablePickingInfo, StreamlitDeckProps } from "./types"
+import { parseElementJson } from "./utils"
 
 import "mapbox-gl/dist/mapbox-gl.css"
-import { parseElementJson } from "./utils"
 
 interface DeckObject {
   initialViewState: {

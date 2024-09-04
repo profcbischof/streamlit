@@ -66,9 +66,17 @@ H3_HEX_DATA_2 = [
 ]
 df2 = pd.DataFrame(H3_HEX_DATA_2)
 
+selected_df2_indices = get_selected_indices_from_session_state(
+    "h3_hex_map", "MyHexLayer2"
+)
+
+df2["color"] = df2.index.to_series().apply(
+    lambda idx: [255, 0, 0] if idx in selected_df2_indices else [0, 0, 255]
+)
+
 
 st.write(
-    "This example shows off multiselect. Utilize `shift+click` to select multiple objects on the map!"
+    "This example shows off multiselect. Utilize `shift+click` to select multiple objects on the map! Also note that there are 2 distinct Layers in this example."
 )
 
 event_data = st.pydeck_chart(
@@ -91,25 +99,26 @@ event_data = st.pydeck_chart(
                 get_line_color=[255, 255, 255],
                 line_width_min_pixels=2,
             ),
-            # pdk.Layer(
-            #     "H3HexagonLayer",
-            #     df2,
-            #     id="MyHexLayer2",
-            #     pickable=True,
-            #     stroked=True,
-            #     filled=True,
-            #     extruded=True,
-            #     elevation_scale=20,
-            #     get_hexagon="hex",
-            #     get_elevation="count",
-            #     get_fill_color="[255, (1 - count / 10) * 255, 0]",
-            #     get_line_color=[255, 255, 255],
-            #     line_width_min_pixels=2,
-            #     highlight_color=[255, 0, 0],
-            #     highlighted_object_index=get_selected_hex_index_from_session_state(
-            #         "h3_hex_map", "MyHexLayer2"
-            #     ),
-            # ),
+            pdk.Layer(
+                "H3HexagonLayer",
+                df2,
+                id="MyHexLayer2",
+                pickable=True,
+                stroked=True,
+                filled=True,
+                extruded=True,
+                elevation_scale=20,
+                get_hexagon="hex",
+                get_elevation="count",
+                get_fill_color="color",
+                # get_fill_color="[0, 0, (1 - count / 10) * 255]",
+                get_line_color=[255, 255, 255],
+                line_width_min_pixels=2,
+                # highlight_color=[255, 0, 0],
+                # highlighted_object_index=get_selected_hex_index_from_session_state(
+                #     "h3_hex_map", "MyHexLayer2"
+                # ),
+            ),
         ],
     ),
     use_container_width=True,
@@ -192,6 +201,36 @@ path_data = st.pydeck_chart(
     use_container_width=True,
     on_select="rerun",
     key="path_data_map",
+)
+
+st.write("This is a chart without any selection")
+
+df3 = pd.DataFrame(H3_HEX_DATA)
+
+st.pydeck_chart(
+    pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=37.76,
+            longitude=-122.4,
+            zoom=11,
+            pitch=50,
+        ),
+        layers=[
+            pdk.Layer(
+                "H3HexagonLayer",
+                df3,
+                id="MyHexLayer",
+                pickable=True,
+                stroked=True,
+                filled=True,
+                get_hexagon="hex",
+                get_fill_color="color",
+                get_line_color=[255, 255, 255],
+                line_width_min_pixels=2,
+            ),
+        ],
+    )
 )
 
 

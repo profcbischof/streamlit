@@ -287,16 +287,22 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
 
     // TODO:
     // 1. Be able to differentiate a widget from a view-only Chart element
-    // 2. Unselect an already selected index
+    // 2. Need a better type for the stringValue of this element
 
     const wasShiftClick = event.srcEvent.shiftKey
 
     const currState = JSON5.parse(widgetMgr.getStringValue(element) || "{}")
-    const indices = wasShiftClick
+    const indices: number[] = wasShiftClick
       ? currState.selection[layer]?.indices || []
       : []
 
-    indices.push(index)
+    const existingIndex = indices.indexOf(index)
+    if (wasShiftClick && existingIndex !== -1) {
+      // Unselect an existing index
+      indices.splice(existingIndex, 1)
+    } else {
+      indices.push(index)
+    }
 
     widgetMgr.setStringValue(
       element,

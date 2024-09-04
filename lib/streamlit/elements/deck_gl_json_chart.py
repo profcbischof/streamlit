@@ -31,13 +31,12 @@ from typing import (
 from streamlit import config
 from streamlit.elements.lib.event_utils import AttributeDictionary
 from streamlit.elements.lib.map_utils import get_hash_of_json_data
-from streamlit.elements.lib.utils import Key, to_key
+from streamlit.elements.lib.utils import Key, compute_and_register_element_id, to_key
 from streamlit.errors import StreamlitAPIException
 from streamlit.proto.DeckGlJsonChart_pb2 import DeckGlJsonChart as PydeckProto
 from streamlit.runtime.metrics_util import gather_metrics
 from streamlit.runtime.scriptrunner_utils.script_run_context import get_script_run_ctx
 from streamlit.runtime.state import WidgetCallback, register_widget
-from streamlit.runtime.state.common import compute_widget_id
 
 if TYPE_CHECKING:
     from pydeck import Deck
@@ -235,7 +234,7 @@ class PydeckMixin:
         is_selection_activated = on_select != "ignore"
 
         pydeck_proto.id = (
-            compute_widget_id(
+            compute_and_register_element_id(
                 "deck_gl_json_chart",
                 user_key=key,
                 key=key,
@@ -261,7 +260,6 @@ class PydeckMixin:
                 "deck_gl_json_chart",
                 pydeck_proto,
                 ctx=ctx,
-                user_key=key,
                 deserializer=serde.deserialize,
                 on_change_handler=on_select if callable(on_select) else None,
                 serializer=serde.serialize,

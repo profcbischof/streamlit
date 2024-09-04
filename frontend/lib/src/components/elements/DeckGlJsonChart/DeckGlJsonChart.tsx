@@ -19,7 +19,6 @@ import React, { PureComponent, ReactNode } from "react"
 import { DeckGL } from "@deck.gl/react/typed"
 import JSON5 from "json5"
 import isEqual from "lodash/isEqual"
-import memoize from "lodash/memoize"
 import { MapContext, NavigationControl, StaticMap } from "react-map-gl"
 import { withTheme } from "@emotion/react"
 import {
@@ -55,6 +54,7 @@ import {
 import type { SerializablePickingInfo, StreamlitDeckProps } from "./types"
 
 import "mapbox-gl/dist/mapbox-gl.css"
+import { parseElementJson } from "./utils"
 
 interface DeckObject {
   initialViewState: {
@@ -84,10 +84,6 @@ registerLoaders([CSVLoader, GLTFLoader])
 
 const jsonConverter = new JSONConverter({ configuration })
 
-const parseElementJson = memoize(
-  (json: string): StreamlitDeckProps => JSON5.parse(json)
-)
-
 export interface DeckGLProps {
   width: number
   theme: EmotionTheme
@@ -106,6 +102,7 @@ export interface State {
   viewState: Record<string, unknown>
   initialized: boolean
   initialViewState: Record<string, unknown>
+  hash: string | undefined
   id: string | undefined
   pydeckJson: StreamlitDeckProps | undefined
   isFullScreen: boolean
@@ -123,6 +120,7 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
       pitch: 0,
       zoom: 11,
     },
+    hash: undefined,
     initialized: false,
     initialViewState: {},
     id: undefined,
@@ -179,10 +177,21 @@ export class DeckGlJsonChart extends PureComponent<PropsWithHeight, State> {
   ): DeckObject => {
     const { element, width, height, theme, isFullScreen } = props
 
-    // TODO: We probably need a better optimization for when to re-parse the JSON.
-    // For now, this change is needed since the `highlighted_object_index` can change.
-    state.pydeckJson = parseElementJson(element.json)
-    state.id = element.id
+    const currFullScreen = isFullScreen ?? false
+
+    // Only parse JSON when not transitioning to/from fullscreen, the element hash changes, or theme changes
+    if (
+      element.hash !== state.hash ||
+      state.isFullScreen !== currFullScreen ||
+      state.isLightTheme !== hasLightBackgroundColor(theme)
+    ) {
+      state.pydeckJson = parseElementJson(element.json)
+      state.id = element.id
+    }
+
+    if (!state.pydeckJson) {
+      state.pydeckJson = {}
+    }
 
     // If unset, use either the Mapbox light or dark style based on Streamlit's theme
     // For Mapbox styles, see https://docs.mapbox.com/api/maps/styles/#mapbox-styles

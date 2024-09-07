@@ -41,7 +41,7 @@ import {
 import { WidgetStateManager } from "@streamlit/lib/src/WidgetStateManager"
 import { FormClearHelper } from "@streamlit/lib/src/components/widgets/Form/FormClearHelper"
 import {
-  StyledWidgetLabelHelp,
+  StyledWidgetLabelHelpInline,
   WidgetLabel,
 } from "@streamlit/lib/src/components/widgets/BaseWidget"
 import TooltipIcon from "@streamlit/lib/src/components/shared/TooltipIcon"
@@ -338,9 +338,9 @@ function ButtonGroup(props: Readonly<Props>): ReactElement {
         )}
       >
         {help && (
-          <StyledWidgetLabelHelp>
-            <TooltipIcon content={help} placement={Placement.LEFT} />
-          </StyledWidgetLabelHelp>
+          <StyledWidgetLabelHelpInline>
+            <TooltipIcon content={help} placement={Placement.TOP_RIGHT} />
+          </StyledWidgetLabelHelpInline>
         )}
       </WidgetLabel>
       <BasewebButtonGroup

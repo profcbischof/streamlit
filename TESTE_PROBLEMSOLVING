@@ -1,0 +1,70 @@
+import streamlit as st
+
+def quizz_causa_raiz():
+    st.title("Quizz de Identificação de Causas Raiz")
+    
+    st.write("Contexto: Atrasos constantes na entrega de produtos da fábrica 'Casa Nova'.")
+    st.write("A equipe de gestão precisa identificar a(s) causa(s) raiz dos atrasos.")
+    
+    causas_encontradas = []
+
+    # Pergunta 1
+    resposta1 = st.radio("Pergunta 1: Qual fator inicial parece ser a causa mais provável dos atrasos?", 
+                        ["Problemas no fornecimento de matéria-prima.", 
+                         "Equipamentos frequentemente quebram.", 
+                         "A equipe de produção é ineficiente.", 
+                         "O transporte dos produtos é problemático."])
+
+    if resposta1 == "Problemas no fornecimento de matéria-prima.":
+        resposta2 = st.radio("Pergunta 2: Qual é a razão mais provável?", 
+                             ["O fornecedor não está cumprindo os prazos.",
+                              "O departamento de compras não está fazendo pedidos a tempo.", 
+                              "A previsão de demanda está incorreta."])
+        if resposta2 == "O departamento de compras não está fazendo pedidos a tempo.":
+            st.success("Resposta correta! O departamento de compras está demorando a fazer novos pedidos.")
+            causas_encontradas.append("Demora no pedido de matéria-prima.")
+
+    elif resposta1 == "Equipamentos frequentemente quebram.":
+        resposta3 = st.radio("Pergunta 3: Qual a causa mais provável das falhas nas máquinas?", 
+                             ["Manutenção inadequada das máquinas.", 
+                              "Equipamentos antigos e ultrapassados.", 
+                              "Operadores de máquinas não qualificados."])
+        if resposta3 == "Manutenção inadequada das máquinas.":
+            st.success("Resposta correta! A manutenção inadequada está causando falhas frequentes.")
+            causas_encontradas.append("Manutenção inadequada das máquinas.")
+
+    elif resposta1 == "A equipe de produção é ineficiente.":
+        resposta4 = st.radio("Pergunta 4: Qual é o motivo mais provável?", 
+                             ["Falta de treinamento.", 
+                              "Excesso de rotatividade de funcionários.", 
+                              "Problemas no planejamento da produção."])
+        if resposta4 == "Excesso de rotatividade de funcionários.":
+            st.success("Resposta correta! A alta rotatividade está prejudicando a produção.")
+            causas_encontradas.append("Alta rotatividade de funcionários.")
+
+    elif resposta1 == "O transporte dos produtos é problemático.":
+        resposta5 = st.radio("Pergunta 5: Qual é a causa mais provável?", 
+                             ["Rotas mal planejadas.", 
+                              "Veículos com manutenção atrasada.", 
+                              "Uso de transportadoras terceirizadas ineficientes."])
+        if resposta5 == "Veículos com manutenção atrasada.":
+            st.success("Resposta correta! A manutenção dos veículos está atrasada.")
+            causas_encontradas.append("Manutenção atrasada dos veículos de transporte.")
+
+    # Verificando múltiplas causas
+    if len(causas_encontradas) > 0:
+        resposta_final = st.radio("Pergunta Final: Existe a possibilidade de haver mais de uma causa para os atrasos?", ["Sim", "Não"])
+        
+        if resposta_final == "Sim":
+            st.success("Correto! A análise mostra que pode haver múltiplas causas.")
+            st.write("Você identificou as seguintes causas:")
+            for causa in causas_encontradas:
+                st.write(f"- {causa}")
+        else:
+            st.error("Na verdade, os atrasos podem ter mais de uma causa. As causas identificadas são:")
+            for causa in causas_encontradas:
+                st.write(f"- {causa}")
+
+# Executar o quizz
+if __name__ == "__main__":
+    quizz_causa_raiz()
